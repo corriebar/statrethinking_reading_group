@@ -1,0 +1,270 @@
+---
+title: "Brian's solutions"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  comment = NA,
+  message = TRUE,
+  warning = TRUE,
+  error = TRUE,
+  cache = FALSE,
+  dev = 'svglite'
+)
+
+library(tidyverse)
+# library(here)
+library(scales)
+# library(rethinking)
+
+theme_set(theme_bw())
+```
+
+## Part 1
+
+Here are the data we are working with.
+
+```{r}
+N <- 15
+W <- 8
+p_true <- 0.7
+```
+
+We create a grid of 10001 points along $[0, 1]$.
+
+```{r}
+grid <- tibble(p = seq(0, 1, length.out = 10001))
+```
+
+The probabilities are thus:
+
+```{r}
+probs1 <- grid %>% 
+  mutate(
+    prior = 1, # flat prior
+    likelihood = dbinom(W, N, p),
+    unst_posterior = prior * likelihood,
+    posterior = unst_posterior / sum(unst_posterior)
+  ) %>% 
+  select(-unst_posterior)
+```
+
+
+```{r, echo=F}
+probability_levels <- c('prior', 'likelihood', 'posterior')
+
+probs1 %>% 
+  gather(component, probability, -p) %>% 
+  mutate(component = component %>% ordered(probability_levels)) %>% 
+  ggplot() +
+  aes(p, probability, colour = component) +
+  geom_line() +
+  geom_vline(xintercept = p_true, linetype = 'dashed') +
+  facet_wrap(~component, scales = 'free_y') +
+  # facet_wrap(~ordered(component, probability_levels), scales = 'free_y') +
+  NULL
+```
+
+We can sample from the posterior many times, then just calculate the quantiles from the sample.
+
+```{r}
+probs1 %>% 
+  sample_n(10000, replace = T, weight = posterior) %>% 
+  summarise(
+    q005 = quantile(p, 0.005),
+    q25 = quantile(p, 0.25),
+    q50 = median(p, 0.5),
+    q75 = quantile(p, 0.75),
+    q995 = quantile(p, 0.995)
+  )
+```
+
+
+## Part 2
+
+The only change here is specifying that the prior is 0 below 0.5.
+
+```{r}
+probs2 <- grid %>% 
+  mutate(
+    prior = if_else(p >= 0.5, 1, 0),
+    likelihood = dbinom(W, N, p),
+    unst_posterior = prior * likelihood,
+    posterior = unst_posterior / sum(unst_posterior)
+  ) %>% 
+  select(-unst_posterior)
+```
+
+
+```{r, echo=F}
+probs2 %>% 
+  gather(component, probability, -p) %>% 
+  mutate(component = component %>% ordered(probability_levels)) %>% 
+  ggplot() +
+  aes(p, probability, colour = component) +
+  geom_line() +
+  geom_vline(xintercept = p_true, linetype = 'dashed') +
+  facet_wrap(~component, scales = 'free_y') +
+  NULL
+```
+
+The lower bound for the quantiles is now higher.
+
+```{r}
+probs2 %>% 
+  sample_n(10000, replace = T, weight = posterior) %>% 
+  summarise(
+    q005 = quantile(p, 0.005),
+    q25 = quantile(p, 0.25),
+    q50 = median(p, 0.5),
+    q75 = quantile(p, 0.75),
+    q995 = quantile(p, 0.995)
+  )
+```
+
+We can calculate the probabilty that the posterior lies within 0.05 of the true value by sampling and averaging.
+
+```{r}
+probs1 %>% 
+  bind_rows(probs2, .id = 'exercise') %>% 
+  group_by(exercise) %>% 
+  sample_n(10000, replace = T, weight = posterior) %>% 
+  summarise(prob_p_near_true = mean(between(p, p_true - 0.05, p_true + 0.05)))
+```
+
+Here we see that the prior from this exercise has more probability mass around the true value.
+
+### Point-mass priors
+
+Let's mess around with some strange priors to see what happens. Here we put a prior with mass only on two points.
+
+```{r}
+probs_points <- grid %>% 
+  mutate(
+    prior = if_else(p == 0.4 | p == 0.6, 1, 0),
+    likelihood = dbinom(W, N, p),
+    unst_posterior = prior * likelihood,
+    posterior = unst_posterior / sum(unst_posterior)
+  ) %>% 
+  select(-unst_posterior)
+
+probs_points %>% 
+  gather(component, probability, -p) %>% 
+  mutate(component = component %>% ordered(probability_levels)) %>% 
+  ggplot() +
+  aes(p, probability, colour = component) +
+  geom_line() +
+  facet_wrap(~component, scales = 'free_y')
+```
+
+```{r}
+probs_points %>% 
+  sample_n(10000, replace = T, weight = posterior) %>% 
+  summarise(
+    q005 = quantile(p, 0.005),
+    q25 = quantile(p, 0.25),
+    q50 = median(p, 0.5),
+    q75 = quantile(p, 0.75),
+    q995 = quantile(p, 0.995)
+  )
+```
+
+### Multiple interval priors
+
+Now let's put prior density on disjoint intervals.
+
+```{r}
+probs_bars <- grid %>% 
+  mutate(
+    prior = if_else(between(p, 0.2, 0.3) | between(p, 0.7, 0.8), 1, 0),
+    likelihood = dbinom(W, N, p),
+    unst_posterior = prior * likelihood,
+    posterior = unst_posterior / sum(unst_posterior)
+  ) %>% 
+  select(-unst_posterior)
+
+probs_bars %>% 
+  gather(component, probability, -p) %>% 
+  mutate(component = component %>% ordered(probability_levels)) %>% 
+  ggplot() +
+  aes(p, probability, colour = component) +
+  geom_line() +
+  facet_wrap(~component, scales = 'free_y')
+```
+
+```{r}
+probs_bars %>% 
+  sample_n(10000, replace = T, weight = posterior) %>% 
+  summarise(
+    q005 = quantile(p, 0.005),
+    q25 = quantile(p, 0.25),
+    q50 = median(p, 0.5),
+    q75 = quantile(p, 0.75),
+    q995 = quantile(p, 0.995)
+  )
+```
+
+## Part 3
+
+An easy way is just to simulate the calculation for different values of N using our best guess as to the true value we are trying to estimate. Note that we run multiple iterations for each value of N.
+
+```{r}
+probs <- tibble(N = c(10^(1:4), 3000)) %>% 
+  crossing(iter = 1:10) %>% 
+  mutate(W = rbinom(n(), N, p_true)) %>% 
+  crossing(grid) %>% 
+  group_by(N, iter) %>% 
+  mutate(
+    prior = 1,
+    likelihood = dbinom(W, N, p),
+    unst_posterior = prior * likelihood,
+    posterior = unst_posterior / sum(unst_posterior)
+  ) %>% 
+  select(-unst_posterior)
+
+probs %>% 
+  sample_n(10000, replace = T, weight = posterior) %>% 
+  summarise(
+    q005 = quantile(p, 0.005),
+    q50 = median(p, 0.5),
+    q995 = quantile(p, 0.995)
+  ) %>% 
+  mutate(width = q995 - q005) %>% 
+  summarise(
+    q005 = mean(q005),
+    q50 = mean(q50),
+    q995 = mean(q995),
+    width = mean(width)
+  )
+
+```
+
+Thus it seems we need around 3000 trials to get a 99th percentile interval to have a width below 0.05.
+
+Alternatively, we can use a normal approximaton to get a rough idea how large N is. The  standard deviation is 
+
+$$
+\sqrt{p_{true} (1 - p_{true}) / N}.
+$$
+
+The 99th percentile of our estimate must be plus/minus 3 standard deviations. So
+
+$$
+6\sqrt{p_{true} (1 - p_{true}) / N} < 0.05
+$$
+
+which means
+
+$$
+N >  (p_{true} (1 - p_{true})) / (0.05 / 6)^2.
+$$
+
+Thus, $N$ will be somewhere around
+
+```{r}
+N <- (p_true * (1 - p_true)) / (0.05 / 6)^2
+N
+```
+

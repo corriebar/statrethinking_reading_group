@@ -16,7 +16,7 @@ The following resources will give you an overview of the differences between bot
 
 * This forum post gives a simple example analyzed from both the frequentist and the Bayesian perspective
 
-[What's the difference between a confidence interval and a credible interval?](https://stats.stackexchange.com/questions/2272/whats-the-difference-between-a-confidence-interval-and-a-credible-interval)]
+[What's the difference between a confidence interval and a credible interval?](https://stats.stackexchange.com/questions/2272/whats-the-difference-between-a-confidence-interval-and-a-credible-interval)
 
 * For those who prefer a book, this one provides a good overview of different ways of thinking about probability
 

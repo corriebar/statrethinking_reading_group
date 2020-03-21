@@ -1,4 +1,6 @@
-# Difference between frequentist and Bayesian approaches
+# Additional resources
+
+## Difference between frequentist and Bayesian approaches
 
 When learning about Bayesian statistics, it is common to hear a lot about how it is "better" than frequentist (or classic) statistics. However, it is not always clear what **frequentist** means. It is always good to remember that they provide different tools to analyze random events. Bayesian statistics does not make the frequentist toolbox irrelevant or invalid.
 

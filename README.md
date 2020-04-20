@@ -10,4 +10,4 @@ We follow the material from his last [lecture series](https://github.com/rmcelre
 ## Solutions to exercises and homework
 
 - [Chapter 2 / Homework for week 1](chapter_2/callander/homework.html)
-- [Chapter 3](chapter_3/chapt3_ex.html)
+- [Chapter 3](chapter_3/chapter3_ex.html)

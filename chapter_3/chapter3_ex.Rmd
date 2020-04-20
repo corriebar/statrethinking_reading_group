@@ -1,6 +1,5 @@
 ---
 title: "Chapter 3 - Exercise Solutions"
-output: html_document
 author: "Corrie Bartelheimer"
 ---
 

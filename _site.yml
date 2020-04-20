@@ -1,10 +1,5 @@
 name: "Statistical Rethinking - Reading Group"
-navbar:
-  title: "Statistical Rethinking"
-  left:
-    - text: "Home"
-      href: index.html
 output:
-  html_document:
-    theme: cosmo
-
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github

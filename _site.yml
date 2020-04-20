@@ -1,4 +1,5 @@
 name: "Statistical Rethinking - Reading Group"
+output_dir: "_site"
 output:
   prettydoc::html_pretty:
     theme: cayman

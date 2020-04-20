@@ -1,4 +1,6 @@
-# Statistical Rethinking - Reading Group 2020
+---
+title: Statistical Rethinking - Reading Group 2020
+---
 
 Material for the Berlin Bayesian reading group covering [Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/) by Richard McElreath.
 

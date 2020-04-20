@@ -11,7 +11,7 @@
 
 
 
-<title>index.utf8</title>
+<title>Statistical Rethinking - Reading Group 2020</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -99,6 +99,93 @@ summary {
 </style>
 
 
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
 
 <!-- tabsets -->
 
@@ -172,16 +259,38 @@ summary {
 
 
 
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Statistical Rethinking</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
 <div class="fluid-row" id="header">
 
 
 
+<h1 class="title toc-ignore">Statistical Rethinking - Reading Group 2020</h1>
 
 </div>
 
 
-<div id="statistical-rethinking---reading-group-2020" class="section level1">
-<h1>Statistical Rethinking - Reading Group 2020</h1>
 <p>Material for the Berlin Bayesian reading group covering <a href="https://xcelab.net/rm/statistical-rethinking/">Statistical Rethinking</a> by Richard McElreath.</p>
 <p>We follow the material from his last <a href="https://github.com/rmcelreath/statrethinking_winter2019">lecture series</a>. You can either watch his lectures or read the book. To get access to the pdf-version, check out these <a href="https://docs.google.com/presentation/d/1-dbUYuFJ5QH8ARBP_TD3-Ydy_8LL2vhCsNpdcvbbBLA/edit?usp=sharing">slides</a> (need to request access) or ask in our Slack. Additional resources can be found <a href="additional_resources.md">here</a>.</p>
 <ul>
@@ -193,7 +302,6 @@ summary {
 <li><a href="chapter_2/callander/homework.html">Chapter 2 / Homework for week 1</a></li>
 <li><a href="chapter_3/chapter3_ex.html">Chapter 3</a></li>
 </ul>
-</div>
 </div>
 
 

@@ -17,3 +17,7 @@ We follow the material from his last [lecture series](https://github.com/rmcelre
 
 - [Chapter 2 / Homework for week 1](chapter_2/callander/homework.html)
 - [Chapter 3](chapter_3/chapter3_ex.html)
+
+
+## Contribute
+You can add your own solutions by opening a pull request on the [Github Repo](https://github.com/corriebar/statrethinking_reading_group).

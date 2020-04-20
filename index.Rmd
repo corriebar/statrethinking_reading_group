@@ -1,5 +1,9 @@
 ---
 title: "Statistical Rethinking - Reading Group 2020"
+output:   
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
 ---
 
 Material for the Berlin Bayesian reading group covering [Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/) by Richard McElreath.

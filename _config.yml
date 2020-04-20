@@ -1,1 +1,6 @@
-theme: jekyll-theme-cayman
+name: "Statistical Rethinkin - Reading Group"
+output_dir: "docs"
+output:
+  html_document:
+ theme: jekyll-theme-cayman
+

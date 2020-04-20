@@ -1,6 +1,10 @@
 ---
 title: "Chapter 3 - Exercise Solutions"
 author: "Corrie Bartelheimer"
+output:   
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
 ---
 
 ```{r setup, include=FALSE}

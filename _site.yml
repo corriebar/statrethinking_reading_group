@@ -1,9 +1,4 @@
 name: "Statistical Rethinking - Reading Group"
-navbar:
-  title: "Statistical Rethinking"
-  left:
-  - text: "Home"
-    href: index.html
 output:
   prettydoc::html_pretty:
     theme: cayman

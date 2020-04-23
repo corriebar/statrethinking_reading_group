@@ -1,0 +1,442 @@
+---
+title: "Chapter 4 - Exercise Solutions"
+author: "Corrie Bartelheimer"
+output:   
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, dev="svglite", 
+                      warning = F, message = F, 
+                      fig.height = 5,
+                      fig.width = 5,
+                      comment=NA)
+options( digits = 3)
+library(rethinking)
+library(tidyverse)
+```
+
+These are my solutions to the practice questions of chapter 4, _Linear Models_, of the book "Statistical Rethinking" (version 2) by Richard McElreath.
+
+## Easy.
+__4E1.__ In the model definition below, which line is the likelihood:
+$$
+\begin{align*}
+y_i &\sim \text{Normal}(\mu, \sigma) & & \text{This is the likelihood}\\
+\mu &\sim \text{Normal}(0, 10) \\
+\sigma &\sim \text{Exponential}(1)
+\end{align*} $$
+
+__4E2.__ In the model definition just above, how many parameters are in the posterior distribution?
+
+There are __2__ parameters, $\mu$ and $\sigma$.
+
+__4E3.__ Write down the appropriate form of Bayes' theorem that includes the proper likelihood and priors.
+
+$$\begin{align*}
+P(\mu, \sigma| y_i) &\propto \text{Likelihood } \times \text{ Prior probability} \\
+& \propto \mathcal{L}(y | \mu, \sigma ) \times P(\mu) \times P(\sigma)
+\end{align*}$$
+For the likelihood, we get the following term:
+$$\begin{align*}
+\mathcal{L}(y | \mu, \sigma ) &= \prod_i \text{Normal}(y_i|\mu, \sigma) \\
+& = \prod_i \frac{1}{\sqrt{2\pi \sigma^2} }\exp(- \frac{(y_i-\mu)^2}{2\sigma^2}).
+\end{align*}$$
+and for the two priors we have
+$$\begin{align*}
+P(\mu) &= \text{Normal}(\mu| 0,10) \\
+&= \frac{1}{\sqrt{2\pi \times 10^2} }\exp(- \frac{\mu^2}{2\times 10^2}) \\
+\\
+P(\sigma) &= \text{Exponential}(\sigma|1) \\
+&= e^{-\sigma}.
+\end{align*}$$
+Plugging everything in one equation, we get the following:
+$$\begin{align*}
+P(\mu, \sigma| y_i) &= \frac{\prod_i \text{Normal}(y_i|\mu, \sigma) \times 
+\text{Normal}(\mu| 0,10) \times \text{Exponential}(\sigma|1) }
+{\int \prod_i \text{Normal}(y_i|\mu, \sigma) \times 
+\text{Normal}(\mu| 0,10) \times \text{Exponential}(\sigma|1) \text{ d}\mu\text{d}\sigma} \\
+\\
+&\propto \prod_i \frac{1}{\sqrt{2\pi \sigma^2} }\exp(- \frac{(y_i-\mu)^2}{2\sigma^2}) \times 
+\frac{1}{\sqrt{2\pi \times 10^2} }\exp(- \frac{\mu^2}{2\times 10^2}) \times  e^{-\sigma}.
+\end{align*}$$
+
+This big construct in the last line is then basically one big function that takes $\mu$ and $\sigma$ as input where $y_i$, our data, is given (and thus fixed).
+
+__4E4.__ In the model definition below, which line is the linear model?
+$$\begin{align*}
+y_i &\sim \text{Normal}(\mu_i, \sigma) \\
+\mu_i &= \alpha + \beta x_i & \text{This is the linear model}\\
+\alpha &\sim \text{Normal}(0,10) \\
+\beta &\sim \text{Normal}(0,1) \\
+\sigma &\sim \text{Exponential}(2)
+\end{align*}$$
+
+__4E5.__ In the model definition just above, how many parameters are in the posterior distribution?
+
+There are __3__ parameters in the posterior distribution, $\alpha$, $\beta$, and $\sigma$.
+
+## Medium.
+__4M1.__ For the model definition below, simulate observed heights from the prior (not the posterior).
+$$\begin{align*}
+y_i &\sim \text{Normal}(\mu, \sigma) \\
+\mu &\sim \text{Normal}(0, 10) \\
+\sigma &\sim \text{Exponential}(1)
+\end{align*}$$
+
+```{r}
+n <- 10000
+mu <- rnorm(n, 0, 10)
+sigma <- rexp(n, 2)
+y_prior <- rnorm(n, mu, sigma)
+dens(y_prior)
+```
+
+__4M2.__ Translate the model just above into a `quap()` formula.
+```{r eval=FALSE}
+flist <- alist(
+            y ~ dnorm(mu, sigma),
+            mu ~ dnorm(0, 10),
+            sigma ~ dexp(1)
+          ) 
+```
+
+__4M3.__ Translate the `quap()` formula below into a mathematical model definition.
+```{r eval=FALSE}
+flist <- alist(
+  y ~ dnorm( mu, sigma ),
+  mu <- a + b*x,
+  a ~ dnorm( 0, 10 ),
+  b ~ dnorm( 0, 1 ),
+  sigma ~ dexp( 1 )
+)
+```
+The mathematical definition:
+$$\begin{align*}
+y_i &\sim \text{Normal}(\mu_i, \sigma) \\
+\mu_i &= \alpha + \beta x_i \\
+\alpha &\sim \text{Normal}(0,10) \\
+\beta &\sim  \text{Normal}(0,1) \\
+\sigma &\sim \text{Exponential}(1) 
+\end{align*}$$
+
+__4M4.__ A sample of students is measured for height each year for three years. You want to fit a linear regression, using year as a prediction. Write down the mathematical model definition.
+$$\begin{align*}
+h_i &\sim \text{Normal}(\mu_i, \sigma) \\
+\mu_i &= \alpha + \beta t_i \\
+\alpha &\sim \text{Normal}(120, 20) \\
+\beta &\sim \text{Normal}(0, 10) \\
+\sigma &\sim \text{Uniform}(0, 50)
+\end{align*}$$
+Here, $h_i$ is the height and $t_i$ is the year of the $i$th observation. Since $\alpha$ is the average height of a student at year zero, I picked a normal distribution with mean 120 (assuming an average height of 120cm) and standard deviation 20. For $\beta$, I picked a normal distribution with mean 0 and standard deviation 10, meaning on average, a person grows 0cm per year with standard deviation 10cm, since I don't expect many people to grow or shrink more than 20cm per year. For $\sigma$, I picked a uniform distribution over the interval $[0, 50]$, expecting that the variance among heights for students of the same age is not larger than 50cm. 
+
+We can also do a small prior predictive check:
+```{r}
+N <- 1000
+a <- rnorm( N, 120, 20 )
+b <- rnorm( N, 0, 10 )
+sigma <- runif( N, 0, 50 )
+```
+```{r, echo=F}
+plot( NULL, xlim=range(0:3), ylim=c(-100, 400),
+      xlab="year", ylab="height")
+abline( h = 0, lty=2 )
+abline( h=272, lty = 1, lwd=0.5)
+for (i in 1:100) curve( a[i] + b[i] * x,
+                      from=0, to=3, add  = TRUE,
+                      col=col.alpha("black", 0.2))
+text(0, 283, "World's tallest person (272cm)", adj=c(0,0), cex=0.8)
+text(0, -30, "Embryo", adj=c(0,0), cex=0.8)
+```
+
+The model mostly stays between 0cm and 250cm. It still goes quite extreme and also has negative growth but otherwise it doesn't look to unreasonable.
+
+A short look at the predicted distribution of height at the first year:
+```{r}
+height_0 <- rnorm( N, a + b * 0, sigma )
+dens( height_0 )
+```
+
+Most students at first year would be expected to be between 50cm and 200cm tall. 
+
+__4M5.__ Now suppose, I remind you that every student got taller each year. I will change my priors as follows:
+$$\begin{align*}
+\alpha &\sim \text{Normal}(120, 20) \\
+\beta &\sim \text{Log-Normal}(0, 2.5)
+\end{align*}$$
+I changed $\beta$ to a log-normal distribution, so that $\beta$, the indicator for growth per year, is greater or equal than zero. 
+The resulting model lines then look as follows:
+```{r, echo=F}
+set.seed(2020)
+N <- 1000
+a <- rnorm( N, 120, 20 )
+b <- rlnorm( N, 0, 2.5 )
+sigma <- runif( N, 0, 50 )
+plot( NULL, xlim=range(0:3), ylim=c(-50, 300),
+      xlab="year", ylab="height")
+abline( h = 0, lty=2 )
+abline( h=272, lty = 1, lwd=0.5)
+for (i in 1:50) curve( a[i] + b[i] * x,
+                      from=0, to=3, add  = TRUE,
+                      col=col.alpha("black", 0.2))
+text(0, 283, "World's tallest person (272cm)", adj=c(0,0), cex=0.8)
+text(0, -20, "Embryo", adj=c(0,0), cex=0.8)
+```
+
+__4M6.__ Now suppose, the variance among heights for students of the same age is never more than 64cm. I thus change my priors as follows:
+$$\sigma \sim \text{Uniform}(0, 64).$$
+__4M7.__ Refit model `m4.3` from the chapter but omit the mean weight `xbar`. Compare the new model's posterior to that of the original model. In particular, look at the covariance among the parameters. What is different?
+
+First, let's load the data and fit the `m4.3` model again:
+```{r }
+data("Howell1")
+d <- Howell1
+d2 <- d[ d$age >= 18, ]
+xbar <- mean( d2$weight )
+m4.3 <- quap(
+        alist(
+          height ~ dnorm( mu, sigma),
+          mu <- a + b * ( weight - xbar ) ,
+          a ~ dnorm( 178, 20),
+          b ~ dlnorm( 0, 1),
+          sigma ~ dunif(0, 50)
+        ) ,
+        data = d2
+)
+precis(m4.3)
+```
+Now, we refit an uncentered version of the model:
+```{r }
+m4.3_u <- quap(
+        alist(
+          height ~ dnorm( mu, sigma),
+          mu <- a + b * weight ,
+          a ~ dnorm( 178, 20),
+          b ~ dlnorm( 0, 1),
+          sigma ~ dunif(0, 50)
+        ) ,
+        data = d2
+)
+precis(m4.3_u)
+```
+
+The estimates for $\beta$ and $\sigma$ are still the same, only $\alpha$ is changed. This makes sense since now in the uncentered version, the meaning of $\alpha$ has changed. Before $\alpha$ was the average height for when $ x -\bar{x}$ was 0, that is for observations where the weight is equal to the average weight. Now, $\alpha$ is the average height for the case that the weight is 0. As there are no people with a weight of zero, this $\alpha$ is harder to interpret.
+We can compute $\mu$ in the uncentered version for when $x$ is the average weight:
+```{r}
+113.9 + 0.9 * xbar
+```
+
+and unsurprisingly, we get the same value as in the centered model. The results for the two models are thus pretty much equal.
+Let's check the covariance between parameters. Remember, in the centered version, the correlation between parameters was practically zero.
+```{r}
+( vcm <- vcov( m4.3_u ) )
+```
+
+We now observe some correlation between $\alpha$ and $\beta$. Let's check the correlation matrix:
+```{r }
+cov2cor( vcm )
+```
+Now, there's a quite strong negative correlation between the two parameters.
+
+The same in visual:
+
+```{r, fig.height=6, fig.width=6, echo=F}
+pairs( m4.3_u )
+```
+
+What is happening here? Every time the slope parameter increases a bit, the intercept changes in the opposite direction, i.e. decreases.
+
+Compare the posterior predictions of both models:
+```{r, fig.height=6, fig.width=10}
+plot_posterior <- function(model) {
+  weight.seq <- seq( from=25, to=70, by=1)
+  
+  mu <- link(model, data = data.frame( weight=weight.seq ) )
+  mu.mean <- apply(mu, 2, mean)
+  mu.PI <- apply(mu, 2, PI, prob=0.89)
+  sim.height <- sim( model, data=list(weight=weight.seq))
+  height.PI <- apply(sim.height, 2, PI, prob=0.89)
+  plot( height ~ weight, d2, col=col.alpha(rangi2, 0.5))
+  
+  # draw a MAP line
+  lines(weight.seq, mu.mean)
+  
+  # draw PI region for line
+  shade(mu.PI, weight.seq)
+  
+  # draw PI region for simulated heights
+  shade(height.PI, weight.seq )
+}
+par(mfrow=c(1,2))
+plot_posterior(m4.3_u)
+mtext("Uncentered model")
+plot_posterior(m4.3)
+mtext("Centered model")
+```
+
+The posterior predictions look very much the same for both models.
+
+__4M8.__ In the chapter, we used 15 knots with the cherry blossom spline. Increase the number of knots and observe what happens to the resulting spline.
+[WIP]
+
+## Hard.
+__4H1.__ !Kung census data: Provide predicted heights and 89% intervals for the following weights of individuals.
+```{r}
+weights <- c(46.95, 43.72, 64.78, 32.59, 54.63)
+```
+For this, I reuse the model `m4.3` from above and simulate heights for the individuals above by hand:
+```{r}
+post <- extract.samples(m4.3)
+sim.height <- sapply( weights, function(weight) {
+  rnorm(
+    n = nrow(post),
+    mean = post$a + post$b * ( weight - xbar ),
+    sd = post$sigma
+  )
+})
+```
+
+Computing the mean and 89% compatibility interval using `PI()` gives us:
+```{r}
+height.PI <- apply(sim.height, 2, PI, prob=0.89)
+height.mean <- apply(sim.height, 2, mean)
+
+pred_df <- data.frame("individual"=1:5, "weight"=weights, "exptected_height"=height.mean, 
+                      "PI_89_lower"=height.PI[1,], "PI_89_upper"=height.PI[2,])
+pred_df 
+```
+
+__4H2.__ Select the rows from the `Howell1` data with age below 18 years.
+
+(a) Fit a linear regression to these data, using `quap()`.
+
+I will use the same model as above but adapt the prior for $\alpha$ to account for lower heights:
+```{r }
+d18 <- d[ d$age < 18, ]
+xbar <- mean( d18$weight )
+
+model18 <- quap(
+  alist(
+    height ~ dnorm( mu, sigma) ,
+    mu <- a + b * ( weight - xbar )  ,
+    a ~ dnorm( 156, 20) ,
+    b ~ dlnorm( 0, 1 ) ,
+    sigma ~ dunif(0, 50)
+  ),
+  data=d18
+)
+precis(model18)
+```
+As above, since the weight values are centered, the intercept `a` corresponds to the average height, which is here 108.3. This is much lower than in the model above (but expected since the individuals in this data set are younger). The slope `b` is interpreted such that for every 10kg heavier, an individual is expected to be 27cm taller. The standard deviation `sigma` in this model is higher than in the one above, suggesting a higher uncertainty in the predictions.
+
+(b) Plot the raw data and superimpose the MAP regression line and 89% interval for the mean and for the predicted height.
+
+We first compute the regression line by generating a sequence over the whole range of weights for which we then sample from the posterior distribution to compute a sample of mu, of which we can then compute the mean and the 89% PI.
+We similarly compute the 89% PI for the predicted height.
+```{r}
+weight.seq <- seq(from=4, to=45, length.out = 30)          
+post <- extract.samples(model18)          
+
+mu <- link( model18, data = list(weight = weight.seq))
+mu.mean <- apply(mu, 2, mean)
+mu.PI <- apply(mu, 2, PI, prob=0.89)
+
+sim.height <- sim( model18, data = list(weight = weight.seq ))
+height.PI <- apply(sim.height, 2, PI, prob=0.89)
+
+# plot everything
+plot(height ~ weight, data=d18, col=col.alpha(rangi2, 0.9), ylim=c(50, 180))   # the raw data
+lines(weight.seq, mu.mean)                                      # the MAP regression line
+shade( mu.PI, weight.seq)                                     # draw PI region around the regression line
+shade( height.PI, weight.seq)                                 # draw PI region for the simulated heights
+mtext("Under 18 model")
+```
+
+(c) What aspects of the model fit concern you?
+
+The linear model doesn't seem to be a very good fit for the data. It performs very poorly for the lower and higher values of weight. One possibility to improve the model could be to use a polynomial model (e.g. of 2nd order) instead.
+
+__4H3.__ A colleague exclaims: "Only the _logarithm_ of body weight scales with height!" Let's try this out.
+
+(a) Use the entire `Howell1` data frame using the following model:
+$$\begin{align*}
+h_i &\sim \text{Normal}(\mu_i, \sigma) \\
+\mu_i &= \alpha + \beta (\log(w_i) - \bar{x}_l) \\
+\alpha &\sim \text{Normal}(178, 20) \\
+\beta &\sim \text{Log-Normal}(0, 1) \\
+\sigma &\sim \text{Uniform}(0, 50)
+\end{align*}$$
+The value $\bar{x}_l$ is the mean of the log-weights.
+Here the model description in R:
+```{r }
+d <- Howell1
+xbarl <- mean( log( d$weight ) )
+
+model.l <- quap(
+  alist(
+    height ~ dnorm( mu, sigma) ,
+    mu <- a + b*( log( weight ) - xbarl ),
+    a ~ dnorm( 178, 20) ,
+    b ~ dlnorm( 0, 1) ,                
+    sigma ~ dunif(0, 50)
+  ),
+  data=d
+)
+precis(model.l)
+```
+Interpreting these results is a bit more difficult since we transformed the weights using the logarithm. The intercept `a` corresponds to the average height of someone whose log-weight is equal to the mean of log-weights, i.e. whose weight is 31kg (this is equivalent to the geometric mean). 
+How to interpret the `b` value?
+If we increase the weight by $p$ percent (ignoring the centralization term for now), we get the following expression for $\mu$:
+$$\begin{align*}
+\mu &= \alpha + \beta \log(\text{weight} \times (1 + p) ) 
+\end{align*}$$
+Using some rules for logarithms, we get:
+$$\begin{align*}
+\mu &= \alpha + \beta \log(\text{weight}) + \beta \log(1 + p)
+\end{align*}$$
+That is, an increase of $p$ percent in the weight variable is associated with an increase of $\mu$ of $\beta \log(1 + p)$. 
+I personally find this not super intuitive, so let's have a look at some plots as well. We compute again the mean $\mu$ and its compatibility interval as well as simulate predictions for the height.
+```{r}
+weight.seq <- seq(from=2, to=70, length.out = 100)            
+post <- extract.samples(model.l)                           
+# compute mu
+mu <- link( model.l, data = list(weight = weight.seq))
+mu.mean <- apply(mu, 2, mean)  # MAP line
+mu.PI <- apply(mu, 2, PI, prob=0.89)
+
+# compute predicted height
+sim.height <- sim( model.l, data = list(weight = weight.seq))
+height.PI <- apply(sim.height, 2, PI, prob=0.89)
+
+# the plot
+plot(height ~ weight, data=d, col=col.alpha(rangi2, 0.6))
+lines(weight.seq, mu.mean)                                      # the MAP regression line
+shade( mu.PI, weight.seq)                                     # draw PI region around the regression line
+shade( height.PI, weight.seq)                                # draw PI region for the simulated heights
+mtext("Model using log-weight")
+```
+
+Compared to the model above fit to only the children and also compared to the models earlier in the chapter using the full data set with polynomial regression, this model seems to perform quite well on the data.
+
+We can also visualize the model on log scale:
+
+```{r, echo=F, fig.height=5, fig.width=5}
+plot(height ~ log(weight), data=d, col=col.alpha(rangi2, 0.6))
+lines(log(weight.seq), mu.mean)
+shade(mu.PI, log(weight.seq))
+shade( height.PI, log(weight.seq))
+mtext("The same model on log scale")
+```
+
+Given the last two plots, I'd say the colleague was right: The logarithm of body weight scales very well with height.
+
+__4H4.__ [WIP]
+
+__4H5.__
+
+__4H6.__
+
+__4H7.__
+
+<small>[Full code.](https://github.com/corriebar/statrethinking_reading_group/blob/master/chapter_4/chapter4_ex.Rmd)<small>

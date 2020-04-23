@@ -7,7 +7,7 @@ output:
     highlight: github
 ---
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, dev="svglite", 
+knitr::opts_chunk$set(echo = TRUE,
                       warning = F, message = F, 
                       fig.height = 5,
                       fig.width = 5,
